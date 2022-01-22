@@ -1,26 +1,66 @@
-﻿DateTime start = DateTime.Now;
+﻿void Usage() =>
+    Console.WriteLine("Perdorimi: LeagueScheduleGeneric.exe -k -f\n-k Numri i javëve\n-f Shtegu ku është fajlli hyrës\nShembull: LeagueScheduleGeneric.exe -k 15 -f D:\\Inputfile.txt");
 
-int[,] matches = new int[15, 16];
-string[] content = (File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "Inputfile.txt"))).Split("\"");
-int week = 0;
-List<int> teams = new() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
-List<int> AllPossibleCombinations = new();
+if(args.Length < 4)
+{
+    Usage();
+    return;
+}
+
+DateTime start = DateTime.Now;
+
+int teamsNr;
+int weekNr = int.Parse(args[1]);
+string filePath = args[3];
+int[] teams;
+int[,] matches;
+int weeksInFile = 0;
+
+if (!File.Exists(filePath))
+{
+    Console.WriteLine("Shkruaj saktë shtegun e fajllit hyrës!");
+    Usage();
+    return;
+}
+
+string[] content = (File.ReadAllText(filePath)).Split("\"");
+teamsNr = content.Where(t => t is not "" and not ",\r\n" and not "\r\n").FirstOrDefault().Replace(":", ",").Split(",").Length;
+if(weekNr<=0 || weekNr > teamsNr - 1)
+{
+    Console.WriteLine("Nuk mund të gjenerohet orari me parametrat e kërkuar!");
+    Console.WriteLine($"Nëse keni {teamsNr} ekipe maksimumi i numrit të javëve që mund të gjenerohet orari është {teamsNr-1} javë dhe minimumi i javëve të zgjedhura është 1 javë.");
+    Usage();
+    return;
+}
+
+
+matches = new int[weekNr, teamsNr];
+teams = Enumerable.Range(1, teamsNr).ToArray();
 
 foreach (var row in content.Where(t => t != "" && t != ",\r\n" && t != "\r\n" && !(t.Trim().StartsWith(",//w") || t.Trim().StartsWith("//w"))))
 {
     string[] weekMatches = row.Replace(":", ",").Split(",");
     for (int i = 0; i < weekMatches.Length; i++)
     {
-        matches[week, i] = int.Parse(weekMatches[i]);
+        matches[weeksInFile, i] = int.Parse(weekMatches[i]);
     }
-    week++;
+    weeksInFile++;
+    if (weekNr <= weeksInFile)
+    {
+        Console.WriteLine("Do të mbishkruhen javët në file!\nA dëshironi të vazhdoni: 1-Po, 0-Jo");
+        int proceed = int.Parse(Console.ReadLine().ToString());
+        if(proceed==1)
+            break;
+        else
+            return;
+    }
 }
 
 bool IsInFile(int team1, int team2)
 {
-    for (int i = 0; i < 15; i++)
+    for (int i = 0; i < weekNr; i++)
     {
-        for (int j = 0; j < 16; j += 2)
+        for (int j = 0; j < teamsNr; j += 2)
         {
             if ((matches[i, j] == team1 && matches[i, j + 1] == team2) || (matches[i, j] == team2 && matches[i, j + 1] == team1))
                 return false;
@@ -29,9 +69,11 @@ bool IsInFile(int team1, int team2)
     return true;
 }
 
-for (int i = 0; i < teams.Count - 1; i++)
+List<int> AllPossibleCombinations = new();
+
+for (int i = 0; i < teams.Length-1; i++)
 {
-    for (int j = i + 1; j < teams.Count; j++)
+    for (int j = i + 1; j < teams.Length; j++)
     {
         if (IsInFile(teams[i], teams[j]))
         {
@@ -43,7 +85,7 @@ for (int i = 0; i < teams.Count - 1; i++)
 
 bool GenerateRow(int match, int[] week)
 {
-    if (match == 8)
+    if (match == teamsNr/2)
         return true;
 
     if (match == 0)
@@ -78,6 +120,7 @@ bool IsValid(int teamA, int teamB, int[] week)
         if ((week[i] == teamA || week[i] == teamB))
             return false;
     }
+
     return true;
 }
 
@@ -100,30 +143,30 @@ void FilterCombinations(int[] array)
         AllPossibleCombinations.RemoveAt(indexesToDelete[i] - i);
 }
 
-for (int i = 5; i < 15; i++)
+for (int i = weeksInFile; i < weekNr; i++)
 {
-    int[] currentWeek = new int[16];
+    int[] currentWeek = new int[teamsNr];
     var test = GenerateRow(0, currentWeek);
     FilterCombinations(currentWeek);
 
-    for (int j = 0; j < 16; j++)
+    for (int j = 0; j < teamsNr; j++)
     {
         matches[i, j] = currentWeek[j];
     }
 }
 
-for (int i = 5; i < 15; i++)
+for (int i = 0; i < weekNr; i++)
 {
-    Console.Write("\"");
-    for (int j = 0; j < 16; j += 2)
+    for (int j = 0; j < teamsNr; j += 2)
     {
         Console.Write($"{matches[i, j]}:{matches[i, j + 1]},");
     }
-    Console.Write($"\", //w{i+1}");
     Console.WriteLine();
 }
 
 TimeSpan timeForCalc = DateTime.Now.Subtract(start);
+double memory = (float)GC.GetTotalMemory(true) / (1024);
 
-Console.WriteLine("Koha per gjenerimin e orarit eshte: "+ timeForCalc.ToString("c"));
+Console.WriteLine("Koha per gjenerimin e orarit eshte: " + timeForCalc.ToString("c"));
+Console.WriteLine("Hapsira ne memorie: "+memory.ToString("###,###.###################")+" KB");
 Console.Read();
