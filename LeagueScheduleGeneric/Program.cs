@@ -24,8 +24,9 @@ if (!File.Exists(filePath))
 }
 
 string[] content = (File.ReadAllText(filePath)).Split("\"");
-teamsNr = content.Where(t => t is not "" and not ",\r\n" and not "\r\n").FirstOrDefault().Replace(":", ",").Split(",").Length;
-if(weekNr<=0 || weekNr > teamsNr - 1)
+teamsNr = content.Where(t => t is not "" and not ",\r\n" and not "\r\n" && !(t.Trim().StartsWith(",//w") || t.Trim().StartsWith("//w"))).FirstOrDefault().Replace(":", ",").Split(",").Length;
+
+if (weekNr<=0 || weekNr > teamsNr - 1)
 {
     Console.WriteLine("Nuk mund të gjenerohet orari me parametrat e kërkuar!");
     Console.WriteLine($"Nëse keni {teamsNr} ekipe maksimumi i numrit të javëve që mund të gjenerohet orari është {teamsNr-1} javë dhe minimumi i javëve të zgjedhura është 1 javë.");
@@ -55,7 +56,8 @@ foreach (var row in content.Where(t => t != "" && t != ",\r\n" && t != "\r\n" &&
     }
 }
 
-bool IsInFile(int team1, int team2)
+
+bool IsInFree(int team1, int team2)
 {
     for (int i = 0; i < weekNr; i++)
     {
@@ -74,7 +76,7 @@ for (int i = 0; i < teams.Length-1; i++)
 {
     for (int j = i + 1; j < teams.Length; j++)
     {
-        if (IsInFile(teams[i], teams[j]))
+        if (IsInFree(teams[i], teams[j]))
         {
             AllPossibleCombinations.Add(teams[i]);
             AllPossibleCombinations.Add(teams[j]);
