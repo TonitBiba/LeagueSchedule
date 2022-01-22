@@ -2,7 +2,7 @@
   "profiles": {
     "LeagueScheduleGeneric": {
       "commandName": "Project",
-      "commandLineArgs": "-k 10 -f \"D:\\Project for work\\App files\\LeagueSchedule\\LeagueScheduleGeneric\\bin\\Debug\\net6.0\\Inputfile.txt\""
+      "commandLineArgs": "-k 15 -f \"D:\\Project for work\\App files\\LeagueSchedule\\LeagueScheduleGeneric\\bin\\Debug\\net6.0\\Inputfile.txt\""
     }
   }
 }

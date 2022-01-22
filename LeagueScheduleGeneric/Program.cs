@@ -33,7 +33,6 @@ if(weekNr<=0 || weekNr > teamsNr - 1)
     return;
 }
 
-
 matches = new int[weekNr, teamsNr];
 teams = Enumerable.Range(1, teamsNr).ToArray();
 
@@ -155,12 +154,16 @@ for (int i = weeksInFile; i < weekNr; i++)
     }
 }
 
-for (int i = 0; i < weekNr; i++)
+for (int i = weeksInFile; i < weekNr; i++)
 {
+    Console.Write("\"");
     for (int j = 0; j < teamsNr; j += 2)
     {
-        Console.Write($"{matches[i, j]}:{matches[i, j + 1]},");
+        Console.Write($"{matches[i, j]}:{matches[i, j + 1]}");
+        if (j != teamsNr - 2)
+            Console.Write(",");
     }
+    Console.Write($"\", //w{i + 1}");
     Console.WriteLine();
 }
 

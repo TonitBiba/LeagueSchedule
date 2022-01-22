@@ -117,7 +117,9 @@ for (int i = 5; i < 15; i++)
     Console.Write("\"");
     for (int j = 0; j < 16; j += 2)
     {
-        Console.Write($"{matches[i, j]}:{matches[i, j + 1]},");
+        Console.Write($"{matches[i, j]}:{matches[i, j + 1]}");
+        if (j != 14)
+            Console.Write(",");
     }
     Console.Write($"\", //w{i+1}");
     Console.WriteLine();
